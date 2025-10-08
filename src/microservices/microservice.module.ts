@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ClientProxyFactory, ClientsModule, Transport } from '@nestjs/microservices';
-import { UserMessage } from './subscriber/users.message'
 import { ConfigService } from '@nestjs/config';
+
+import { UserMessage } from './subscriber/users.message'
 
 @Module({
     imports: [
