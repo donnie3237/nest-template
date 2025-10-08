@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
-import { ClientsModule, Transport } from '@nestjs/microservices';
+import { ClientProxyFactory, ClientsModule, Transport } from '@nestjs/microservices';
+import { UserMessage } from './subscriber/users.message'
+import { ConfigService } from '@nestjs/config';
 
 @Module({
     imports: [
@@ -9,7 +11,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
                 transport: Transport.RMQ,
                 options: {
                     urls: [process.env.RABBITMQ_URL || 'amqp://localhost:5672'],
-                    queue: 'microservice_queue',
+                    queue: 'user_queue',
                     queueOptions: {
                         durable: false
                     },
@@ -17,14 +19,21 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
             },
         ]),
     ],
-    controllers: [],
+    controllers: [UserMessage],
     providers: [
         {
             provide: 'some_service',
-            useFactory: (client) => {
-                return {
-                    // Define your microservice methods here
-                };
+            useFactory: (configService: ConfigService) => {
+                return ClientProxyFactory.create({
+                    transport: Transport.RMQ,
+                    options: {
+                        urls: [configService.get('rabbitmq.urls')],
+                        queue: 'some_queue',
+                        queueOptions: {
+                            durable: false
+                        },
+                    },
+                });
             },
         },
     ],
